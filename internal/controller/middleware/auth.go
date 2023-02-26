@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/Nuriddin-Olimjon/tourniquet/app/internal/model"
-	"github.com/Nuriddin-Olimjon/tourniquet/app/pkg/token"
+	"github.com/Nuriddin-Olimjon/url-shortener/pkg/apperrors"
+	"github.com/Nuriddin-Olimjon/url-shortener/pkg/token"
 	"github.com/gin-gonic/gin"
 )
 
@@ -19,21 +19,21 @@ func AuthMiddleware(tokenMaker token.PasetoMaker) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		authorizationHeader := ctx.GetHeader(AuthorizationHeaderKey)
 		if len(authorizationHeader) == 0 {
-			err := model.NewAuthorizationErr("authorization header is not provided")
+			err := apperrors.NewAuthorization("authorization header is not provided")
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, err)
 			return
 		}
 
 		fields := strings.Fields(authorizationHeader)
 		if len(fields) < 2 {
-			err := model.NewAuthorizationErr("invalid authorization header format")
+			err := apperrors.NewAuthorization("invalid authorization header format")
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, err)
 			return
 		}
 
 		authorizationType := strings.ToLower(fields[0])
 		if authorizationType != AuthorizationTypeBearer {
-			err := model.NewAuthorizationErr("unsupported authorization type " + authorizationType)
+			err := apperrors.NewAuthorization("unsupported authorization type " + authorizationType)
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, err)
 			return
 		}
