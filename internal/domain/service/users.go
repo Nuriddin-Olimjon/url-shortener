@@ -23,6 +23,9 @@ func NewUserService(repo repository.Store) UserService {
 	}
 }
 
+// Compilation checks
+var _ UserService = (*userService)(nil)
+
 type userService struct {
 	repo repository.Store
 }
