@@ -15,6 +15,7 @@ type Store interface {
 	StartTX(ctx context.Context) (pgx.Tx, *sqlc.Queries, error)
 }
 
+// NewStore returnes new store
 func NewStore(ctx context.Context, psqlUri string) Store {
 	dbConn, err := pgxpool.Connect(ctx, psqlUri)
 	if err != nil {
