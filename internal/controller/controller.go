@@ -12,6 +12,7 @@ import (
 
 type Controller struct {
 	engine      *gin.Engine
+	authService service.AuthService
 	userService service.UserService
 	urlService  service.URLService
 	config      *config.Config
@@ -23,18 +24,30 @@ func NewController(cfg *config.Config, repo repository.Store) Controller {
 
 	pasetoMaker, err := token.NewPasetoMaker(cfg.TokenSymmetricKey)
 	if err != nil {
-		log.Fatalf("cannot create paseto token maker: %w", err)
+		log.Fatalf("cannot create paseto token maker: %s", err)
 	}
 
+	authservice := service.NewAuthService(repo, *pasetoMaker, cfg)
 	userService := service.NewUserService(repo)
-	urlService := service.NewURLService(repo)
+	urlService := service.NewURLService(repo, cfg.ShortURIDuration)
 
 	controller := Controller{
-		engine: engine,
+		engine:      engine,
+		authService: authservice,
 		userService: userService,
-		urlService: urlService,
-		config: cfg,
-		tokenMaker: pasetoMaker,
+		urlService:  urlService,
+		config:      cfg,
+		tokenMaker:  pasetoMaker,
 	}
 
+	registerCustomValidators()
+
+	controller.setupRouter()
+
+	return controller
+}
+
+// Start runs the HTTP server on a specific address.
+func (c *Controller) Start(address string) error {
+	return c.engine.Run(address)
 }

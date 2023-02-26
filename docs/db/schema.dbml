@@ -18,13 +18,16 @@ Table users {
 }
 
 Table urls {
-  short_uri varchar [pk, not null, unique]
+  id int [pk, increment]
+  short_uri varchar [unique]
   user_id int [ref: > users.id, not null]
   requested_count int [not null, default: 0]
   original_url text [not null]
+  expires_at timestamptz [not null]
 
   Indexes {
     short_uri
     user_id
+    expires_at
   }
 }

@@ -1,0 +1,189 @@
+definitions:
+  entity.CreateURIParams:
+    properties:
+      original_url:
+        minLength: 5
+        type: string
+      short_uri:
+        type: string
+    required:
+    - original_url
+    type: object
+  entity.CreateUserParams:
+    properties:
+      full_name:
+        minLength: 3
+        type: string
+      password:
+        minLength: 6
+        type: string
+      username:
+        minLength: 5
+        type: string
+    required:
+    - full_name
+    - password
+    - username
+    type: object
+  entity.LoginParams:
+    properties:
+      password:
+        minLength: 6
+        type: string
+      username:
+        minLength: 5
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  entity.LoginResponse:
+    properties:
+      access_token:
+        type: string
+      access_token_expires_at:
+        type: string
+    type: object
+  entity.URL:
+    properties:
+      expires_at:
+        type: string
+      id:
+        type: integer
+      original_url:
+        type: string
+      requested_count:
+        type: integer
+      short_uri:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  entity.UpdateURIParams:
+    properties:
+      new_short_uri:
+        type: string
+      old_short_uri:
+        type: string
+    required:
+    - new_short_uri
+    - old_short_uri
+    type: object
+  entity.User:
+    properties:
+      full_name:
+        type: string
+      id:
+        type: integer
+      username:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /me:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.User'
+      summary: Get current user info
+      tags:
+      - user
+  /register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Body
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/entity.CreateUserParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.User'
+      summary: Register new user
+      tags:
+      - user
+  /short-uri:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Body
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/entity.CreateURIParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.URL'
+      summary: Create new short uri
+      tags:
+      - uri
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Body
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/entity.UpdateURIParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.URL'
+      summary: Update short uri
+      tags:
+      - uri
+  /token:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Body
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/entity.LoginParams'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.LoginResponse'
+      summary: Create new token
+      tags:
+      - auth
+  /urls:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.URL'
+            type: array
+      summary: Get current user urls
+      tags:
+      - user
+swagger: "2.0"

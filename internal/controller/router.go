@@ -1,37 +1,34 @@
 package controller
 
 import (
-	"net/http"
-
-	"github.com/gin-gonic/gin"
+	swagDocs "github.com/Nuriddin-Olimjon/url-shortener/docs/api/swagger"
+	"github.com/Nuriddin-Olimjon/url-shortener/internal/controller/middleware"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func (c *Controller) setupRouter() {
-	basePrefix := "/api"
 
-	api := c.engine.Group(basePrefix)
+	// Handle all shorts
+	c.engine.GET("/:uri", c.HandleShortURI)
+
+	apiPrefix := "/api"
+	api := c.engine.Group(apiPrefix)
 
 	// Swagger conf
-	// swagDocs.SwaggerInfo.BasePath = basePrefix
-	// swagDocs.SwaggerInfo.Title = "Tourniquet api docs"
-	// swagDocs.SwaggerInfo.Version = "1"
-	// api.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	swagDocs.SwaggerInfo.BasePath = apiPrefix
+	swagDocs.SwaggerInfo.Title = "URL shortener docs"
+	swagDocs.SwaggerInfo.Version = "1.1"
+	api.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	// Open endpoints
-	api.GET("/ping", func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, gin.H{"message": "pong"})
-	})
+	api.POST("/register", c.RegisterUser)
+	api.POST("/token", c.GetAccessToken)
 
-	// api.POST("/login", c.LoginAdmin)
-
-	// // Basic auth endpoints
-	// api.POST("/organizations", middleware.BasicAuth(server.config), server.CreateOrganization)
-	// api.POST("/locations", middleware.BasicAuth(server.config), server.CreateLocation)
-	// api.POST("/admins", middleware.BasicAuth(server.config), server.CreateAdmin)
-	// api.POST("/admin-orgs", middleware.BasicAuth(server.config), server.CreateAdminOrg)
-
-	// // Token auth endpoints
-	// tokenAuthRoutes := api.Use(middleware.AuthMiddleware(server.tokenMaker))
-	// tokenAuthRoutes.GET("/me", server.GetCurrentAdmin)
-	// tokenAuthRoutes.GET("/organizations/:id/locations", server.GetOrgLocations)
+	// Token auth endpoints
+	authRoutes := api.Use(middleware.AuthMiddleware(*c.tokenMaker))
+	authRoutes.GET("/me", c.GetCurrentUser)
+	authRoutes.GET("/urls", c.GetCurrentUserUrls)
+	authRoutes.POST("/short-uri", c.CreateShortURI)
+	authRoutes.PUT("/short-uri", c.UpdateShortURI)
 }

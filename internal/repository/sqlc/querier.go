@@ -6,16 +6,19 @@ package sqlc
 
 import (
 	"context"
+
+	null "gopkg.in/guregu/null.v4"
 )
 
 type Querier interface {
 	CreateURL(ctx context.Context, arg CreateURLParams) (int32, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
-	GetURLByID(ctx context.Context, id int32) (Url, error)
+	GetURLByShortURI(ctx context.Context, shortUri null.String) (Url, error)
 	GetUserByID(ctx context.Context, id int32) (User, error)
 	GetUserByUsername(ctx context.Context, username string) (User, error)
 	GetUserURLS(ctx context.Context, userID int32) ([]Url, error)
-	SetShortURLByID(ctx context.Context, arg SetShortURLByIDParams) error
+	IncreaseURLRequestedCount(ctx context.Context, shortUri null.String) error
+	SetShortURLByID(ctx context.Context, arg SetShortURLByIDParams) (Url, error)
 }
 
 var _ Querier = (*Queries)(nil)

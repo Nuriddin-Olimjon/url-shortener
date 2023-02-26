@@ -22,7 +22,7 @@ func NewStore(ctx context.Context, psqlUri string) Store {
 		log.Fatal("failed to connecto to psql", err)
 	}
 
-	log.Panicln("successfully connected to postgres")
+	log.Println("successfully connected to postgres")
 	return &postgresStore{
 		Queries: sqlc.New(dbConn),
 		DB:      dbConn,

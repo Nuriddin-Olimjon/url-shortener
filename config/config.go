@@ -19,10 +19,12 @@ type Config struct {
 	AppMode              AppMode       `mapstructure:"APP_MODE"`
 	DBDriver             string        `mapstructure:"DB_DRIVER"`
 	DBSource             string        `mapstructure:"DB_SOURCE"`
+	MigrationURL         string        `mapstructure:"MIGRATION_URL"`
 	HttpServerAddress    string        `mapstructure:"HTTP_SERVER_ADDRESS"`
 	TokenSymmetricKey    string        `mapstructure:"TOKEN_SYMMETRIC_KEY"`
 	AccessTokenDuration  time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
 	RefreshTokenDuration time.Duration `mapstructure:"REFRESH_TOKEN_DURATION"`
+	ShortURIDuration     time.Duration `mapstructure:"SHORT_URL_DURATION"`
 }
 
 // LoadConfig reads configuration from file or environment variables.

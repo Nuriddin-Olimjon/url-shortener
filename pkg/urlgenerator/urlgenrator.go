@@ -2,6 +2,7 @@ package urlgenerator
 
 import (
 	"errors"
+
 	"github.com/speps/go-hashids"
 )
 
@@ -10,7 +11,7 @@ var hashID *hashids.HashID
 func init() {
 	hashConf := hashids.NewData()
 	hashConf.Salt = "salt"
-	hashConf.MinLength = 3 // Hash ID length, 8 means a hash ID such as xxxxxxxx
+	hashConf.MinLength = 8 // Hash ID length, 8 means a hash ID such as xxxxxxxx
 	hashId, err := hashids.NewWithData(hashConf)
 	if err != nil {
 		panic(err)

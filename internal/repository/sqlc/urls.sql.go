@@ -7,39 +7,42 @@ package sqlc
 
 import (
 	"context"
+	"time"
+
+	null "gopkg.in/guregu/null.v4"
 )
 
 const createURL = `-- name: CreateURL :one
 INSERT INTO urls (
     user_id,
-    requested_count,
-    original_url
+    original_url,
+    expires_at
 ) VALUES (
     $1, $2, $3
 ) RETURNING id
 `
 
 type CreateURLParams struct {
-	UserID         int32  `json:"user_id"`
-	RequestedCount int32  `json:"requested_count"`
-	OriginalUrl    string `json:"original_url"`
+	UserID      int32     `json:"user_id"`
+	OriginalUrl string    `json:"original_url"`
+	ExpiresAt   time.Time `json:"expires_at"`
 }
 
 func (q *Queries) CreateURL(ctx context.Context, arg CreateURLParams) (int32, error) {
-	row := q.db.QueryRow(ctx, createURL, arg.UserID, arg.RequestedCount, arg.OriginalUrl)
+	row := q.db.QueryRow(ctx, createURL, arg.UserID, arg.OriginalUrl, arg.ExpiresAt)
 	var id int32
 	err := row.Scan(&id)
 	return id, err
 }
 
-const getURLByID = `-- name: GetURLByID :one
-SELECT id, short_uri, user_id, requested_count, original_url
+const getURLByShortURI = `-- name: GetURLByShortURI :one
+SELECT id, short_uri, user_id, requested_count, original_url, expires_at
 FROM urls
-WHERE id = $1
+WHERE short_uri = $1
 `
 
-func (q *Queries) GetURLByID(ctx context.Context, id int32) (Url, error) {
-	row := q.db.QueryRow(ctx, getURLByID, id)
+func (q *Queries) GetURLByShortURI(ctx context.Context, shortUri null.String) (Url, error) {
+	row := q.db.QueryRow(ctx, getURLByShortURI, shortUri)
 	var i Url
 	err := row.Scan(
 		&i.ID,
@@ -47,14 +50,16 @@ func (q *Queries) GetURLByID(ctx context.Context, id int32) (Url, error) {
 		&i.UserID,
 		&i.RequestedCount,
 		&i.OriginalUrl,
+		&i.ExpiresAt,
 	)
 	return i, err
 }
 
 const getUserURLS = `-- name: GetUserURLS :many
-SELECT id, short_uri, user_id, requested_count, original_url
+SELECT id, short_uri, user_id, requested_count, original_url, expires_at
 FROM urls
 WHERE user_id = $1
+ORDER BY requested_count DESC, id DESC
 `
 
 func (q *Queries) GetUserURLS(ctx context.Context, userID int32) ([]Url, error) {
@@ -63,7 +68,7 @@ func (q *Queries) GetUserURLS(ctx context.Context, userID int32) ([]Url, error) 
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Url
+	items := []Url{}
 	for rows.Next() {
 		var i Url
 		if err := rows.Scan(
@@ -72,6 +77,7 @@ func (q *Queries) GetUserURLS(ctx context.Context, userID int32) ([]Url, error) 
 			&i.UserID,
 			&i.RequestedCount,
 			&i.OriginalUrl,
+			&i.ExpiresAt,
 		); err != nil {
 			return nil, err
 		}
@@ -83,18 +89,41 @@ func (q *Queries) GetUserURLS(ctx context.Context, userID int32) ([]Url, error) 
 	return items, nil
 }
 
-const setShortURLByID = `-- name: SetShortURLByID :exec
+const increaseURLRequestedCount = `-- name: IncreaseURLRequestedCount :exec
 UPDATE urls
-SET short_uri = $1
-WHERE id = $2
+SET requested_count = requested_count + 1
+WHERE short_uri = $1
+`
+
+func (q *Queries) IncreaseURLRequestedCount(ctx context.Context, shortUri null.String) error {
+	_, err := q.db.Exec(ctx, increaseURLRequestedCount, shortUri)
+	return err
+}
+
+const setShortURLByID = `-- name: SetShortURLByID :one
+UPDATE urls
+SET short_uri = $1,
+    expires_at = $2
+WHERE id = $3
+RETURNING id, short_uri, user_id, requested_count, original_url, expires_at
 `
 
 type SetShortURLByIDParams struct {
-	ShortUri string `json:"short_uri"`
-	ID       int32  `json:"id"`
+	ShortUri  null.String `json:"short_uri"`
+	ExpiresAt time.Time   `json:"expires_at"`
+	ID        int32       `json:"id"`
 }
 
-func (q *Queries) SetShortURLByID(ctx context.Context, arg SetShortURLByIDParams) error {
-	_, err := q.db.Exec(ctx, setShortURLByID, arg.ShortUri, arg.ID)
-	return err
+func (q *Queries) SetShortURLByID(ctx context.Context, arg SetShortURLByIDParams) (Url, error) {
+	row := q.db.QueryRow(ctx, setShortURLByID, arg.ShortUri, arg.ExpiresAt, arg.ID)
+	var i Url
+	err := row.Scan(
+		&i.ID,
+		&i.ShortUri,
+		&i.UserID,
+		&i.RequestedCount,
+		&i.OriginalUrl,
+		&i.ExpiresAt,
+	)
+	return i, err
 }

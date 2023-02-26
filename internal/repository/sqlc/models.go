@@ -4,14 +4,19 @@
 
 package sqlc
 
-import ()
+import (
+	"time"
+
+	null "gopkg.in/guregu/null.v4"
+)
 
 type Url struct {
-	ID             int32  `json:"id"`
-	ShortUri       string `json:"short_uri"`
-	UserID         int32  `json:"user_id"`
-	RequestedCount int32  `json:"requested_count"`
-	OriginalUrl    string `json:"original_url"`
+	ID             int32       `json:"id"`
+	ShortUri       null.String `json:"short_uri"`
+	UserID         int32       `json:"user_id"`
+	RequestedCount int32       `json:"requested_count"`
+	OriginalUrl    string      `json:"original_url"`
+	ExpiresAt      time.Time   `json:"expires_at"`
 }
 
 type User struct {

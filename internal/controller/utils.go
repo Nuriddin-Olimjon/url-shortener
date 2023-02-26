@@ -16,6 +16,7 @@ func handleError(c *gin.Context, err error) (ok bool) {
 		status := apperrors.Status(err)
 		if status == http.StatusInternalServerError {
 			log.Println(err.Error())
+			err = apperrors.NewInternal(err.Error())
 		}
 		c.JSON(status, err)
 		ok = false

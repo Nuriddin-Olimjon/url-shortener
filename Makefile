@@ -18,7 +18,7 @@ sqlc:
 	sqlc generate
 
 swag:
-	swag init -g app/cmd/main.go -o app/docs/swagger
+	swag init -g ./main.go -o ./docs/api/swagger
 
 migrate_create:
 	migrate create -ext sql -dir ./internal/repository/migrations -seq ${FILE_NAME}

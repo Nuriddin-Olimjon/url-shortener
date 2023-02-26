@@ -1,5 +1,6 @@
 package repository
 
 const (
-	UserUniqueUsernameConstraint = ""
+	UserUniqueUsernameConstraint = "users_username_key"
+	ShortUriUniqueConstraint     = "urls_short_uri_key"
 )
