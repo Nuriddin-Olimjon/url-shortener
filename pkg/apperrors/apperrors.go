@@ -67,7 +67,7 @@ func (e *ErrorResp) Status() int {
 // GetStatus checks the runtime type
 // of the error and returns an http
 // status code if the error is model.Error
-func GetStatus(err error) int {
+func Status(err error) int {
 	var e *ErrorResp
 	if errors.As(err, &e) {
 		return e.Status()
@@ -97,12 +97,11 @@ func NewForbidden(reason string) *ErrorResp {
 }
 
 // NewBadRequest to create 400 errors (validation, for example)
-func NewBadRequest(reason string, args any) *ErrorResp {
+func NewBadRequest(reason string) *ErrorResp {
 	return &ErrorResp{
-		Type:        BadRequest,
-		Message:     reason,
-		Code:        "400",
-		InvalidArgs: args,
+		Type:    BadRequest,
+		Message: reason,
+		Code:    "400",
 	}
 }
 

@@ -14,7 +14,7 @@ import (
 
 type UserService interface {
 	CreateUser(ctx context.Context, params entity.CreateUserParams) (entity.User, error)
-	GetUserByID(ctx context.Context, id int32) (entity.User, error)
+	GetUserByUsername(ctx context.Context, username string) (entity.User, error)
 }
 
 func NewUserService(repo repository.Store) UserService {
@@ -61,10 +61,10 @@ func (s *userService) CreateUser(ctx context.Context, params entity.CreateUserPa
 	return user, nil
 }
 
-func (s *userService) GetUserByID(ctx context.Context, id int32) (entity.User, error) {
+func (s *userService) GetUserByUsername(ctx context.Context, username string) (entity.User, error) {
 	user := entity.User{}
 
-	dbUser, err := s.repo.GetUserByID(ctx, id)
+	dbUser, err := s.repo.GetUserByUsername(ctx, username)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			log.Println()
