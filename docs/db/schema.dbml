@@ -1,0 +1,30 @@
+Project url-shortener {
+  database_type: 'PostgreSQL'
+  Note: '''
+    # Url-shortener service schema
+  '''
+}
+
+Table users {
+  id int [pk, increment]
+  username varchar [not null, unique]
+  full_name varchar [not null]
+  password varchar [not null]
+
+  Indexes {
+    id [unique]
+    username [unique]
+  }
+}
+
+Table urls {
+  short_uri varchar [pk, not null, unique]
+  user_id int [ref: > users.id, not null]
+  requested_count int [not null, default: 0]
+  original_url text [not null]
+
+  Indexes {
+    short_uri
+    user_id
+  }
+}

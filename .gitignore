@@ -19,17 +19,10 @@
 
 # Go workspace file
 go.work
-.env
+*.env
 
 # file to test service local
 services_test.go
-
-# psql data
-postgres_data
-#ci-cd
-*.sh
-*.yml
-
 
 # IDE
 .vscode/

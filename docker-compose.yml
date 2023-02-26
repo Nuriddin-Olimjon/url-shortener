@@ -1,0 +1,28 @@
+version: "3.8"
+services:
+  backend:
+    build: .
+    ports:
+      - "8081:8081"
+    environment:
+      - TZ=Asia/Tashkent
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+    command: reflex -r "\.go$$" -s -- sh -c "go run ./main.go"
+
+  db:
+    image: "postgres:alpine"
+    env_file:
+      - "db.env"
+    environment:
+      - TZ=Asia/Tashkent
+    ports:
+      - "5432:5432"
+    volumes:
+      - "pgdata:/var/lib/postgresql/data"
+    command: ["postgres", "-c", "log_statement=all"]
+
+volumes:
+  pgdata:
